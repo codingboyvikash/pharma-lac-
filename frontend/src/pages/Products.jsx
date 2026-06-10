@@ -62,9 +62,15 @@ export default function Products() {
     event.preventDefault();
     const data = new FormData();
     Object.entries(form).forEach(([key, value]) => {
-      if (key === 'galleryImages') value.forEach((file) => data.append('galleryImages', file));
-      else if (key === 'mainImage' && value) data.append('mainImage', value);
-      else data.append(key, value);
+      if (key === 'galleryImages' && Array.isArray(value)) {
+        value.forEach((file) => {
+          if (file && (file instanceof File || file?.size)) data.append('galleryImages', file);
+        });
+      } else if (key === 'mainImage' && value && (value instanceof File || value?.size)) {
+        data.append('mainImage', value);
+      } else if (value !== undefined && value !== null && key !== 'galleryImages' && key !== 'mainImage') {
+        data.append(key, value);
+      }
     });
     if (editing) await api.put(`/products/${editing}`, data);
     else await api.post('/products', data);
