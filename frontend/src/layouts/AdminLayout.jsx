@@ -69,6 +69,11 @@ export default function AdminLayout() {
             {/* <button className="icon-btn" onClick={() => setDark((value) => !value)} aria-label="Toggle dark mode">
               {dark ? <FiSun /> : <FiMoon />}
             </button> */}
+            <div className="user-chip">
+              <a href="https://pharma-lac-gamma.vercel.app/" target="_blank" rel="noopener noreferrer">
+                🌐 Visit Website
+              </a>
+            </div>
             <div className="user-chip">{user?.name || 'Admin'}</div>
           </div>
         </header>

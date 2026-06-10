@@ -40,6 +40,12 @@ body.dark-mode {
   border-radius: 8px;
   cursor: pointer;
 }
+a{
+  text-decoration: none;
+}
+.user-chip a{
+  color: var(--text);
+}
 .btn:hover{
   background: #a66f29;
 }
