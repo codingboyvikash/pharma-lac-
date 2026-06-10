@@ -66,9 +66,9 @@ export default function AdminLayout() {
             <FiMenu />
           </button>
           <div className="ms-auto d-flex align-items-center gap-2">
-            <button className="icon-btn" onClick={() => setDark((value) => !value)} aria-label="Toggle dark mode">
+            {/* <button className="icon-btn" onClick={() => setDark((value) => !value)} aria-label="Toggle dark mode">
               {dark ? <FiSun /> : <FiMoon />}
-            </button>
+            </button> */}
             <div className="user-chip">{user?.name || 'Admin'}</div>
           </div>
         </header>
