@@ -78,7 +78,9 @@ export default function Settings() {
             <label className="form-label">Favicon</label>
             <input className="form-control mb-2" type="file" accept="image/*" onChange={(e) => fileChange('favicon', e.target.files[0])} />
             {preview.favicon && <img src={preview.favicon} className="image-preview mb-3" alt="Favicon" />}
-            <button className="btn btn-primary">Update Settings</button>
+       <div>
+             <button className="btn btn-primary">Update Settings</button>
+       </div>
           </form>
         </div>
       </div>
