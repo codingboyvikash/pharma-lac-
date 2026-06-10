@@ -6,6 +6,7 @@ import {
   updateProfile,
   updateSettings
 } from '../controllers/settingsController.js';
+import { getBanners, createBanner, updateBanner, deleteBanner } from '../controllers/bannerController.js';
 import { adminOnly, protect } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
 import { validateRequest } from '../middleware/validateRequest.js';
@@ -23,6 +24,10 @@ router.put(
   ]),
   asyncHandler(updateSettings)
 );
+router.get('/banners', asyncHandler(getBanners));
+router.post('/banners', upload.array('images', 10), asyncHandler(createBanner));
+router.put('/banners/:id', upload.array('images', 10), asyncHandler(updateBanner));
+router.delete('/banners/:id', asyncHandler(deleteBanner));
 router.put('/profile', [body('email').optional().isEmail()], validateRequest, asyncHandler(updateProfile));
 router.put(
   '/password',
