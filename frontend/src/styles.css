@@ -52,6 +52,20 @@ body.dark-mode {
   box-shadow: unset;
 }
 .table-search{z-index: -1;}
+.form-check-input:checked{
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+.form-check-input:focus{
+  box-shadow: unset;
+}
+
+.nav-link{
+  color: var(--primary);
+}
+.nav-link:hover{
+  color: #b46900;
+}
 .login-panel {
   width: min(420px, 100%);
   background: #fff;
