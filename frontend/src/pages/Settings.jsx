@@ -5,18 +5,21 @@ import { imageUrl } from '../utils/format.js';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 
 export default function Settings() {
-  const [settings, setSettings] = useState({ siteName: '', siteLogo: null, favicon: null });
+  const [settings, setSettings] = useState({ siteName: '', siteLogo: null, favicon: null, faq: [] });
   const [profile, setProfile] = useState({ name: '', email: '', phone: '' });
   const [password, setPassword] = useState({ currentPassword: '', newPassword: '' });
   const [preview, setPreview] = useState({ logo: '', favicon: '' });
   const [banners, setBanners] = useState([]);
   const [bannerForm, setBannerForm] = useState({ _id: null, title: '', link: '', imageFiles: [] });
   const [bannerPreview, setBannerPreview] = useState([]);
+  const [faqForm, setFaqForm] = useState({ _id: null, question: '', answer: '' });
   const [toast, setToast] = useState('');
+  const [faqs, setFaqs] = useState([]);
 
   useEffect(() => {
     Promise.all([api.get('/settings'), api.get('/auth/profile'), api.get('/settings/banners')]).then(([settingsRes, profileRes, bannersRes]) => {
-      setSettings({ siteName: settingsRes.data.siteName, siteLogo: null, favicon: null });
+      setSettings({ siteName: settingsRes.data.siteName, siteLogo: null, favicon: null, faq: settingsRes.data.faq || [] });
+      setFaqs(settingsRes.data.faq || []);
       setPreview({ logo: imageUrl(settingsRes.data.siteLogo), favicon: imageUrl(settingsRes.data.favicon) });
       setProfile({ name: profileRes.data.name, email: profileRes.data.email, phone: profileRes.data.phone || '' });
       setBanners(bannersRes.data || []);
@@ -29,8 +32,55 @@ export default function Settings() {
     data.append('siteName', settings.siteName);
     if (settings.siteLogo) data.append('siteLogo', settings.siteLogo);
     if (settings.favicon) data.append('favicon', settings.favicon);
+    data.append('faq', JSON.stringify(faqs || []));
     await api.put('/settings', data);
     setToast('Site settings updated');
+  };
+
+  const addFaq = () => setFaqs([...faqs, { question: '', answer: '' }]);
+  const updateFaq = (idx, key, value) => {
+    const next = [...faqs];
+    next[idx] = { ...next[idx], [key]: value };
+    setFaqs(next);
+  };
+  const deleteFaq = (idx) => setFaqs(faqs.filter((_, i) => i !== idx));
+
+  const editFaq = (f, idx) => {
+    setFaqForm({ _id: idx, question: f.question, answer: f.answer });
+  };
+
+  const saveFaq = async (e) => {
+    e.preventDefault();
+    const next = [...faqs];
+    if (faqForm._id !== null && faqForm._id !== undefined) {
+      // edit existing
+      next[faqForm._id] = { question: faqForm.question, answer: faqForm.answer };
+    } else {
+      // add new
+      next.push({ question: faqForm.question, answer: faqForm.answer });
+    }
+    const data = new FormData();
+    data.append('siteName', settings.siteName);
+    data.append('faq', JSON.stringify(next));
+    if (settings.siteLogo) data.append('siteLogo', settings.siteLogo);
+    if (settings.favicon) data.append('favicon', settings.favicon);
+    const res = await api.put('/settings', data);
+    setFaqs(res.data.faq || next);
+    setFaqForm({ _id: null, question: '', answer: '' });
+    setToast('FAQ saved');
+  };
+
+  const deleteFaqPersist = async (idx) => {
+    if (!window.confirm('Delete this FAQ?')) return;
+    const next = faqs.filter((_, i) => i !== idx);
+    const data = new FormData();
+    data.append('siteName', settings.siteName);
+    data.append('faq', JSON.stringify(next));
+    if (settings.siteLogo) data.append('siteLogo', settings.siteLogo);
+    if (settings.favicon) data.append('favicon', settings.favicon);
+    const res = await api.put('/settings', data);
+    setFaqs(res.data.faq || next);
+    setToast('FAQ deleted');
   };
 
   const saveProfile = async (event) => {
@@ -134,7 +184,41 @@ export default function Settings() {
               ))}
             </div>
           </div>
+
+
+          <form className="form-panel mt-3" onSubmit={saveFaq}>
+            <h5>FAQ Management</h5>
+            <input className="form-control mb-3" placeholder="Question" value={faqForm.question} onChange={(e) => setFaqForm({ ...faqForm, question: e.target.value })} />
+            <input className="form-control mb-3" placeholder="Answer" value={faqForm.answer} onChange={(e) => setFaqForm({ ...faqForm, answer: e.target.value })} />
+            <div>
+              <button className="btn btn-primary me-2">Save FAQ</button>
+              <button type="button" className="btn btn-secondary" onClick={() => setFaqForm({ _id: null, question: '', answer: '' })}>Clear</button>
+            </div>
+          </form>
+
+
+          <div className="card mt-3 p-3 ">
+            <h6>Existing FAQs</h6>
+            <div className="list-group">
+              {faqs.map((f, idx) => (
+                <div key={idx} className="d-flex align-items-center justify-content-between list-group-item">
+                  <div className='question-answer'>
+                    <div><strong>{f.question}</strong></div>
+                    <div className="text-muted small">{f.answer}</div>
+                  </div>
+                  <div>
+                    <button className="btn btn-sm btn-outline-primary me-2" onClick={() => editFaq(f, idx)}><FiEdit2 /></button>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => deleteFaqPersist(idx)}><FiTrash2 /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
+
+
+
+
       </div>
       <div className="row g-3 mt-3">
         <div className="col-lg-4">
@@ -170,7 +254,7 @@ export default function Settings() {
           </form>
         </div>
       </div>
-      
+
     </>
   );
 }
